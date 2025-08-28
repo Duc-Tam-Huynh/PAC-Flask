@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html >
+<!--From https://codepen.io/frytyler/pen/EGdtg-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dự báo P.A.C</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+        width: 95%;
+        padding: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #007BFF;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .text-center{
+      align-content: center;
+      text-align: center;
+    }
+
+    .warpper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tab {
+      cursor: pointer;
+      padding: 10px 20px;
+      margin: 0px 2px;
+      background: #32557f;
+      display: inline-block;
+      color: #fff;
+      border-radius: 3px 3px 0px 0px;
+      box-shadow: 0 0.5rem 0.8rem #00000080;
+      font-weight: bold;
+    }
+
+    .panels {
+      background: #fff;
+      box-shadow: 0 2rem 2rem #00000080;
+      min-height: 200px;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 3px;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .panel {
+      display: none;
+      animation: fadein 0.8s;
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .panel-title {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .radio {
+      display: none;
+    }
+
+    #one:checked ~ .panels #one-panel,
+    #two:checked ~ .panels #two-panel,
+    #three:checked ~ .panels #three-panel {
+      display: block;
+    }
+
+    #one:checked ~ .tabs #one-tab,
+    #two:checked ~ .tabs #two-tab,
+    #three:checked ~ .tabs #three-tab {
+      background: #fff;
+      color: #000;
+      border-top: 3px solid #32557f;
+    }
+</style>
+</head>
+
+<body>
+ <div class="container">
+
+  <h1 class="text-center">DỰ BÁO P.A.C</h1>
+<div class="warpper">
+  <input class="radio" id="one" name="group" type="radio">
+  <input class="radio" id="two" name="group" type="radio" checked>
+  <input class="radio" id="three" name="group" type="radio">
+
+  <div class="tabs">
+    <label class="tab" id="one-tab" for="one">Thủ Đức</label>
+    <label class="tab" id="two-tab" for="two">Tân Hiệp</label>
+    <label class="tab" id="three-tab" for="three">EC=>Mặn</label>
+  </div>
+
+  <div class="panels">
+    <div class="panel" id="one-panel">
+           <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict_td')}}"method="post">
+      <div class="form-group">
+        <label class="param"> Nhiệt độ:</label>
+        <input type="text" name="nhietDo" id="nhietDo"class="form-control" 
+        placeholder="&deg;C"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param">pH:</label>
+        <input type="text"name="pH" id="pH"class="form-control"
+        placeholder="0-14"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Độ đục:</label>
+        <input type="text" name="doDuc" id="doDuc"class="form-control"
+        placeholder="NTU"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" for="doMau">Độ màu:</label>
+        <input type="text" name="doMau" id="doMau"class="form-control"
+        placeholder="Pt-Co"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Chất lơ lửng:</label>
+        <input type="text"  name="chatLoLung" id="chatLoLung"class="form-control"
+        placeholder="mg/L"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Độ dẫn:</label>
+        <input type="text"  name="doDan" id="doDan"class="form-control"
+        placeholder="µS/cm"
+        required/>
+      </div>
+        
+        <br>
+
+        <button type="submit" class="form-group">Dự Báo</button>
+    </form>
+   <br>
+   <h2>{{ prediction_text }}</h2>
+    </div>
+    <div class="panel" id="two-panel">
+
+           <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict_th')}}"method="post">
+      <!-- <div class="form-group">
+        <label class="param"> Nhiệt độ:</label>
+        <input type="text" name="nhietDo"class="form-control"
+        placeholder="&deg;C"
+        required/>
+      </div> -->
+
+      <div class="form-group">
+        <label class="param">pH:</label>
+        <input type="text"name="pH"class="form-control" value="{{ request.form.pH if request.form.pH else '' }}"
+        placeholder="0-14"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Độ đục:</label>
+        <input type="text" name="doDuc"class="form-control" value="{{ request.form.doDuc if request.form.doDuc else '' }}"
+        placeholder="NTU"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" for="doMau">Độ màu:</label>
+        <input type="text" name="doMau"class="form-control" value="{{ request.form.doMau if request.form.doMau else '' }}"
+        placeholder="Pt-Co"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Chất lơ lửng:</label>
+        <input type="text"  name="chatLoLung"class="form-control" value="{{ request.form.chatLoLung if request.form.chatLoLung else '' }}"
+        placeholder="mg/L"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Độ dẫn:</label>
+        <input type="text"  name="doDan" class="form-control" value="{{ request.form.doDan if request.form.doDan else '' }}"
+        placeholder="µS/cm"
+        required/>
+      </div>
+        
+        <br>
+
+        <button type="submit" class="form-group">Dự Báo</button>
+    </form>
+   <br>
+   <h2>P.A.C dự tính: {{ prediction_text }}</h2>
+    </div>
+    <div class="panel" id="three-panel">
+      <div class="panel-title">EC=>Mặn</div>
+           <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict_td')}}"method="post">
+      <div class="form-group">
+        <label class="param"> Nhiệt độ:</label>
+        <input type="text" name="nhietDo"class="form-control"
+        placeholder="&deg;C"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param">pH:</label>
+        <input type="text"name="pH"class="form-control"
+        placeholder="0-14"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Độ đục:</label>
+        <input type="text" name="doDuc"class="form-control"
+        placeholder="NTU"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" for="doMau">Độ màu:</label>
+        <input type="text" name="doMau"class="form-control"
+        placeholder="Pt-Co"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Chất lơ lửng:</label>
+        <input type="text"  name="chatLoLung"class="form-control"
+        placeholder="mg/L"
+        required/>
+      </div>
+
+      <div class="form-group">
+        <label class="param" >Độ dẫn:</label>
+        <input type="text"  name="doDan" class="form-control"
+        placeholder="µS/cm"
+        required/>
+      </div>
+        
+        <br>
+
+        <button type="submit" class="form-group">Dự Báo</button>
+    </form>
+   <br>
+   <h2>{{ prediction_text }}</h2>
+    </div>
+  </div>
+</div>
+
+	
+
+
+
+ </div>
+
+  
+
+</body>
+</html>
